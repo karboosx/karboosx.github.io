@@ -60,13 +60,13 @@ var layers = [];
 // add main layer
 addLayer('main');
 
-// add a rectangle to the main layer
-let a = addCard(100, 100); a.text = 'A';
-a.fontSize = 16;
-a.lineHeight = 20;
-
-addCard(300, 300).text = 'Bffffffffffffffffffffffffffffffffff\n' +
-    'testowo';
+// // add a rectangle to the main layer
+// let a = addCard(100, 100); a.text = 'A';
+// a.fontSize = 16;
+// a.lineHeight = 20;
+//
+// addCard(300, 300).text = 'Bffffffffffffffffffffffffffffffffff\n' +
+//     'testowo';
 
 // draw the canvas
 render();
