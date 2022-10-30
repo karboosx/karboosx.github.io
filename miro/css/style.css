@@ -1,0 +1,107 @@
+body, #body {
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#body {
+    background: radial-gradient(#ffbd75, #ffcc68);
+
+}
+
+#contextMenu {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 5px;
+    padding: 5px;
+    display: none;
+}
+
+#editBox {
+    position: absolute;
+    display: none;
+}
+
+#editBox textarea {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    margin: 0;
+    border: 0;
+    outline: none;
+    font-size: 16px;
+    background: #e57703;
+    padding: 5px;
+    box-sizing: border-box;
+    line-height: 20px;
+    overflow: hidden;
+}
+
+#controls {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 200px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: #eec58c;
+    z-index: 1;
+    border-radius: 27px 27px 0 0;
+    border: 5px solid #fbb57b;
+    border-bottom: 0;
+    transform: translateX(-105px);
+    box-shadow: 1px 1px 10px #00000099;
+}
+
+#controls #newCard {
+    width: 79px;
+    height: 77px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border: 5px solid #1e6d4f;
+    background: #3bd8a2;
+}
+
+#instructions {
+    position: absolute;
+    pointer-events: none;
+    right: 0;
+    width: 300px;
+    border-radius: 0 0 0 32px;
+    background: #ffdfb6;
+    border: 9px solid #fbb57b;
+    border-top: none;
+    border-right: none;
+    padding: 10px;
+    color: #3d3c39;
+    font-family: monospace;
+}
+
+#closeInstructions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: #ffdfb6;
+    border: 9px solid #a27bfb;
+    border-top: none;
+    border-left: none;
+    border-radius: 20px 20px 20px 20px;
+    cursor: pointer;
+    margin: 4px;
+}
