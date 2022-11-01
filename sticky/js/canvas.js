@@ -141,6 +141,11 @@ function isVisible(layer, object) {
     return screenPosition.x + object.width * scale > 0 && screenPosition.x < ctx.width && screenPosition.y + object.height * scale > 0 && screenPosition.y < ctx.height;
 }
 
+function isFullyVisible(object) {
+    var screenPosition = getScreenPosition(object);
+    return screenPosition.x > 0 && screenPosition.x + object.width * scale < ctx.width && screenPosition.y > 0 && screenPosition.y + object.height * scale < ctx.height;
+}
+
 // draw all objects in a layer
 function drawLayer(layerName) {
     for (var i = 0; i < layers.length; i++) {
@@ -694,9 +699,8 @@ canvas.addEventListener('dblclick', function (e) {
     editObjectAt(cursorX, cursorY);
 })
 
-function zoom(delta, cursorX, cursorY) {
+function zoom(delta, cursorX, cursorY, factor = 0.2) {
     var oldScale = scale;
-    let factor = 0.2;
 
     if (delta > 0) {
         scale += factor;
@@ -883,6 +887,7 @@ var touchStartTime;
 var touchStartPosition;
 var touchEndPosition;
 var touchTaps = 0;
+var touches = 0;
 
 newCard.addEventListener('touchstart', function (e) {
     e.preventDefault();
@@ -902,6 +907,7 @@ closeInstructions.addEventListener('click', function () {
 
 // when touch is started with one touch, invoke startMoving
 canvas.addEventListener('touchstart', function (e) {
+    touches = e.touches.length;
     console.log('touchstart');
     e.preventDefault();
 
@@ -946,16 +952,35 @@ canvas.addEventListener('touchmove', function (e) {
 
 function processTaps() {
     console.log('processTaps', touchTaps);
-    if (touchTaps >= 2) {
-        editObjectAt(touchStartPosition.x, touchStartPosition.y);
+    if (touches === 1 && touchTaps >= 2) {
+        // if object is outside of the viewport, zoom out until it is visible
+
+        let max = 10;
+        while (!isFullyVisible(selectedObject) && max > 0) {
+            max--;
+
+            let layer = getLayer(selectedObject.layer);
+            let objectOnScreen = getScreenPosition(selectedObject);
+
+            layer.x -= objectOnScreen.x;
+            redraw();
+
+            if (!isFullyVisible(selectedObject)) {
+                zoom(-1, touchStartPosition.x, touchStartPosition.y, 0.05);
+                redraw();
+            }
+        }
+
+        showEditBox();
     }
 
     touchTaps = 0;
 }
 
+
 function processLongTaps() {
     // when touchTaps is 1 and touch is held for more than 1000ms, show context menu
-    if (touchTaps === 0 && new Date().getTime() - touchStartTime > 500) {
+    if (touches === 1 && touchTaps === 0 && new Date().getTime() - touchStartTime > 500) {
         // if distance between touchstart and touchend is less than 100, show context menu
         if (Math.abs(touchStartPosition.x - touchEndPosition.x) < 100 && Math.abs(touchStartPosition.y - touchEndPosition.y) < 50) {
             openContextMenu(touchStartPosition.x, touchStartPosition.y);
@@ -975,8 +1000,13 @@ canvas.addEventListener('touchend', function (e) {
 
     //check if it is a long press
     if (new Date().getTime() - touchStartTime < 500) {
-        touchTaps++;
-        setTimeout(processTaps, 500);
+        // if starting and ending position is less than 100px, it is a tap
+        if (Math.abs(touchStartPosition.x - touchEndPosition.x) < 100 && Math.abs(touchStartPosition.y - touchEndPosition.y) < 100) {
+            touchTaps++;
+            setTimeout(processTaps, 500);
+        } else {
+            touchTaps = 0;
+        }
     } else {
         processLongTaps();
         touchTaps = 0;

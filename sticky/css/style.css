@@ -63,6 +63,7 @@ html, body {
     border-bottom: 0;
     transform: translateX(-105px);
     box-shadow: 1px 1px 10px #00000099;
+    box-sizing: border-box;
 }
 
 #controls #newCard {
@@ -78,7 +79,8 @@ html, body {
 
 @media (max-width: 600px) {
     #controls {
-        width: 100%;
+        width: 100vw!important;
+        margin: 0;
         height: 50px;
         transform: translateX(0);
         left:0;
