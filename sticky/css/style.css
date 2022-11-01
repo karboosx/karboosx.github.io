@@ -1,7 +1,7 @@
 body, #body {
     margin: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100vw!important;
+    height: 100vh!important;
     overflow: hidden;
 }
 
@@ -17,10 +17,10 @@ html, body {
 
 #contextMenu {
     position: absolute;
-    background: #fff;
-    border: 1px solid #000;
+    background: #eec58c;
+    border: 5px solid #fbb57b;
     border-radius: 5px;
-    padding: 5px;
+    padding: 6px;
     display: none;
 }
 
@@ -76,6 +76,22 @@ html, body {
     background: #3bd8a2;
 }
 
+@media (max-width: 600px) {
+    #controls {
+        width: 100%;
+        height: 50px;
+        transform: translateX(0);
+        left:0;
+        border-radius: 0;
+        padding: 3px;
+    }
+
+    #controls #newCard {
+        width: 50px;
+        height: 50px;
+    }
+}
+
 #instructions {
     position: absolute;
     pointer-events: none;
@@ -104,4 +120,23 @@ html, body {
     border-radius: 20px 20px 20px 20px;
     cursor: pointer;
     margin: 4px;
+}
+
+.options {
+    display: flex;
+    width: 300px;
+    flex-wrap: wrap;
+    align-items: revert;
+    justify-content: stretch;
+}
+
+.options button {
+    margin: 1px;
+    padding: 6px 10px;
+    background: antiquewhite;
+    border: 2px solid #bc876499;
+    border-radius: 3px;
+    width: auto;
+    flex-grow: 1;
+    font-family: monospace;
 }

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div id="controls">
+        <div id="newCard"></div>
+    </div>
+    <div id="instructions" style="display: none">
+        <h1>Instructions</h1>
+        <p>Drag the card from bottom toolbar to create a new card.</p>
+        <p>Double click on the card to edit the text.</p>
+        <p>Drag the card to move it.</p>
+        <p>Right click on the card to open the context menu. You can change the color of the card, size of the text, lock and unlock the card or delete it.</p>
+        <p>Click on the card to select it. You can select multiple cards by holding the shift key and clicking on the cards.</p>
+        <p>Click Ctrl + C to copy the selected cards and Ctrl + V to paste them.</p>
+        <p>Hold Ctrl while dragging the card to snap it to the grid. Hold Shift to increase the grid size.</p>
+    </div>
+    <div id="closeInstructions" style="display: none"></div>
+    <div id="body">
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <div id="contextMenu">
+            <div class="options">
+                <button id="deleteButton">Delete</button>
+                <button id="lockButton">Lock</button>
+                <button id="unlockButton">Unlock</button>
+                <button id="moveToTopButton">Move to Top</button>
+                <button id="moveToBottomButton">Move to Bottom</button>
+                <button id="increaseFontSizeButton">Increase Font Size</button>
+                <button id="decreaseFontSizeButton">Decrease Font Size</button>
+            </div>
+            <div class="options">
+                <button class="changeColor" data-color="red">Red</button>
+                <button class="changeColor" data-color="green">Green</button>
+                <button class="changeColor" data-color="blue">Blue</button>
+                <button class="changeColor" data-color="yellow">Yellow</button>
+                <button class="changeColor" data-color="orange">Orange</button>
+                <button class="changeColor" data-color="purple">Purple</button>
+                <button class="changeColor" data-color="pink">Pink</button>
+            </div>
+        </div>
+        <div id="editBox"><textarea id="editText"></textarea></div>
+    </div>
+
+    <script src="js/canvas.js"></script>
+</body>
+</html>

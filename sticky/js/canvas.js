@@ -60,16 +60,42 @@ var layers = [];
 // add main layer
 addLayer('main');
 
-// // add a rectangle to the main layer
-// let a = addCard(100, 100); a.text = 'A';
-// a.fontSize = 16;
-// a.lineHeight = 20;
-//
-// addCard(300, 300).text = 'Bffffffffffffffffffffffffffffffffff\n' +
-//     'testowo';
+function addWelcomeCards() {
+    let stickyNoteApp = addCard(200, 40);
+    stickyNoteApp.text = 'Sticky Note App';
+    stickyNoteApp.fontSize = 35;
+    stickyNoteApp.lineHeight = 40;
+    stickyNoteApp.height = 50;
+    stickyNoteApp.width = 850;
+    stickyNoteApp.color = 'blue';
 
+    let introduction = addCard(200, 130);
+    introduction.text = 'Introduction';
+    introduction.fontSize = 35;
+    introduction.lineHeight = 40;
+    introduction.height = 50;
+    introduction.width = 850;
+    introduction.color = 'transparent';
+
+    let introductionText = addCard(200, 200);
+    introductionText.text = 'Drag the card from bottom toolbar to create a new card.\n' +
+        'Double click on the card to edit the text.\n' +
+        'Drag the card to move it.\n' +
+        'Right click on the card to open the context menu. You can change the color of the card, size of the text, lock and unlock the card or delete it.\n' +
+        'Click on the card to select it. You can select multiple cards by holding the shift key and clicking on the cards.\n' +
+        'Click Ctrl + C to copy the selected cards and Ctrl + V to paste them.\n' +
+        'Hold Ctrl while dragging the card to snap it to the grid. Hold Shift to increase the grid size.\n';
+    introductionText.fontSize = 20;
+    introductionText.lineHeight = 25;
+    introductionText.height = 300;
+    introductionText.width = 850;
+
+}
+
+addWelcomeCards();
 // draw the canvas
 render();
+renderContextMenu();
 
 // drag the canvas when the mouse is down
 var mouseDown = false;
@@ -174,7 +200,7 @@ function drawObject(layer, object) {
     ctx.fillStyle = colors[object.color].fill;
 
     if (selectedObjectStack && selectedObjectStack.indexOf(object) !== -1 && colors[object.color].transparent) {
-        ctx.strokeStyle = '#000000';
+        ctx.strokeStyle = 'rgba(0,0,0,0.45)';
         ctx.setLineDash([5, 3]);
     }else {
         ctx.strokeStyle = colors[object.color].stroke;
@@ -225,7 +251,7 @@ function drawObject(layer, object) {
 
         // draw wrapped text
         for (var i = 0; i < wrappedText.length; i++) {
-            ctx.fillText(wrappedText[i], object.x + 5, object.y + Math.max(object.lineHeight/4, 10) + (i * object.lineHeight));
+            ctx.fillText(wrappedText[i], object.x + 5, object.y + 7.5 + (i * object.lineHeight));
         }
     }
     ctx.restore();
@@ -325,7 +351,7 @@ function showEditBox() {
     editTextArea.style.fontSize = selectedObject.fontSize * scale + 'px';
     editTextArea.style.lineHeight = selectedObject.lineHeight * scale + 'px';
     editTextArea.style.fontFamily = selectedObject.fontFamily;
-    //editTextArea.style.padding = 4.4 * scale + 'px ' + 5 * scale + 'px';
+    editTextArea.style.padding = 4.4 * scale + 'px ' + 5 * scale + 'px';
     editTextArea.style.backgroundColor = colors[selectedObject.color].fill;
     editTextArea.style.color = colors[selectedObject.color].text;
 
@@ -361,6 +387,9 @@ function addCard(x, y, layerName = 'main') {
 function closeContextMenu() {
     contextMenu.style.display = 'none';
 }
+function showContextMenu() {
+
+}
 
 function removeObject(objects) {
     for (var i = 0; i < layers.length; i++) {
@@ -377,111 +406,138 @@ function removeObject(objects) {
 
 function renderContextMenu() {
     contextMenu.innerHTML = '';
-    // add delete object button to context menu
-    var deleteButton = document.createElement('button');
-    deleteButton.innerHTML = 'Delete';
-    deleteButton.addEventListener('click', function () {
+
+    // add div.options to contextMenu containing options for delete, lock, unlock, etc.
+    var options = document.createElement('div');
+    options.classList.add('options');
+    contextMenu.appendChild(options);
+
+    var deleteOption = document.createElement('button');
+    deleteOption.innerHTML = 'Delete';
+    deleteOption.classList.add('option');
+    deleteOption.addEventListener('click', function() {
         removeObject(selectedObjectStack);
-        selectedObjectStack = null;
         render();
     });
-    contextMenu.appendChild(deleteButton);
+    options.appendChild(deleteOption);
 
-    // add button to move object to front
-    var frontButton = document.createElement('button');
-    frontButton.innerHTML = 'Move to front';
-    frontButton.addEventListener('click', function () {
-        moveObjectToTop();
+    var lockOption = document.createElement('button');
+    lockOption.innerHTML = 'Lock';
+    lockOption.classList.add('option');
+    lockOption.addEventListener('click', function() {
+        for (var i = 0; i < selectedObjectStack.length; i++) {
+            selectedObjectStack[i].locked = true;
+        }
+        render();
     });
-    contextMenu.appendChild(frontButton);
+    options.appendChild(lockOption);
 
-    // add button to move object to back
-    var backButton = document.createElement('button');
-    backButton.innerHTML = 'Move to back';
-    backButton.addEventListener('click', function () {
-        moveObjectToBottom();
+    var unlockOption = document.createElement('button');
+    unlockOption.innerHTML = 'Unlock';
+    unlockOption.classList.add('option');
+    unlockOption.addEventListener('click', function() {
+        for (var i = 0; i < selectedObjectStack.length; i++) {
+            selectedObjectStack[i].locked = false;
+        }
+        render();
     });
-    contextMenu.appendChild(backButton);
+    options.appendChild(unlockOption);
 
-    // add change color buttons to context menu
+    var moveToTopOption = document.createElement('button');
+    moveToTopOption.innerHTML = 'Move to Top';
+    moveToTopOption.classList.add('option');
+    moveToTopOption.addEventListener('click', function() {
+        for (var i = 0; i < selectedObjectStack.length; i++) {
+            var object = selectedObjectStack[i];
+            var layer = getLayer(object.layer);
+            layer.objects.splice(layer.objects.indexOf(object), 1);
+            layer.objects.push(object);
+        }
+        render();
+    });
+    options.appendChild(moveToTopOption);
+
+    var moveToBottomOption = document.createElement('button');
+    moveToBottomOption.innerHTML = 'Move to Bottom';
+    moveToBottomOption.classList.add('option');
+    moveToBottomOption.addEventListener('click', function() {
+        for (var i = 0; i < selectedObjectStack.length; i++) {
+            var object = selectedObjectStack[i];
+            var layer = getLayer(object.layer);
+            layer.objects.splice(layer.objects.indexOf(object), 1);
+            layer.objects.unshift(object);
+        }
+        render();
+    });
+    options.appendChild(moveToBottomOption);
+
+    var increaseFontSizeOption = document.createElement('button');
+    increaseFontSizeOption.innerHTML = 'Increase Font Size';
+    increaseFontSizeOption.classList.add('option');
+    increaseFontSizeOption.addEventListener('click', function() {
+        for (var i = 0; i < selectedObjectStack.length; i++) {
+            var object = selectedObjectStack[i];
+            object.fontSize++;
+            object.lineHeight++;
+        }
+        render(true);
+    });
+    options.appendChild(increaseFontSizeOption);
+
+    var decreaseFontSizeOption = document.createElement('button');
+    decreaseFontSizeOption.innerHTML = 'Decrease Font Size';
+    decreaseFontSizeOption.classList.add('option');
+    decreaseFontSizeOption.addEventListener('click', function() {
+        for (var i = 0; i < selectedObjectStack.length; i++) {
+            var object = selectedObjectStack[i];
+            object.fontSize--;
+            object.lineHeight--;
+        }
+        render(true);
+    });
+    options.appendChild(decreaseFontSizeOption);
+
+    // add div.colors to contextMenu containing options for changing color
+    var colorsContainer = document.createElement('div');
+    colorsContainer.classList.add('options');
+    contextMenu.appendChild(colorsContainer);
+
     for (let color in colors) {
-        var colorButton = document.createElement('button');
-        colorButton.innerHTML = color;
-        colorButton.style.backgroundColor = colors[color].fill;
-        colorButton.addEventListener('click', function () {
-            selectedObject.color = color;
-            render();
-        });
-        contextMenu.appendChild(colorButton);
+        if (colors.hasOwnProperty(color)) {
+            var colorOption = document.createElement('button');
+            colorOption.style.backgroundColor = colors[color].fill;
+            colorOption.innerText = color;
+            colorOption.style.color = colors[color].text;
+            colorOption.classList.add('color');
+            colorOption.addEventListener('click', function() {
+                for (var i = 0; i < selectedObjectStack.length; i++) {
+                    selectedObjectStack[i].color = color;
+                }
+                render();
+            });
+            colorsContainer.appendChild(colorOption);
+        }
     }
-
-
-    if (selectedObject.locked) {
-        var lockButton = document.createElement('button');
-        lockButton.innerHTML = 'Unlock';
-        lockButton.addEventListener('click', function () {
-            selectedObject.locked = false;
-            render();
-        });
-        contextMenu.appendChild(lockButton);
-    }
-
-    if (!selectedObject.locked) {
-        var unlockButton = document.createElement('button');
-        unlockButton.innerHTML = 'Lock';
-        unlockButton.addEventListener('click', function () {
-            selectedObject.locked = true;
-            render();
-        });
-        contextMenu.appendChild(unlockButton);
-    }
-
-    // increase font size
-    var fontSizeButton = document.createElement('button');
-    fontSizeButton.innerHTML = 'Increase font size';
-    fontSizeButton.addEventListener('click', function () {
-        selectedObject.fontSize += 1;
-        selectedObject.lineHeight += 1;
-        render(true);
-    });
-    contextMenu.appendChild(fontSizeButton);
-
-    // decrease font size
-    var fontSizeButton = document.createElement('button');
-    fontSizeButton.innerHTML = 'Decrease font size';
-    fontSizeButton.addEventListener('click', function () {
-        selectedObject.fontSize -= 1;
-        selectedObject.lineHeight -= 1;
-        render(true);
-    });
-    contextMenu.appendChild(fontSizeButton);
 
 }
 
-canvas.addEventListener('mousedown', function (e) {
-    if (e.target !== contextMenu) {
-        closeContextMenu();
-        hideEditBox();
-    } else {
-        return;
-    }
-
+function startMoving(cursorX, cursorY, isShift) {
     movingObject = false;
     resizingObject = false;
     mouseDown = true;
-    mouseDownX = e.clientX;
-    mouseDownY = e.clientY;
+    mouseDownX = cursorX;
+    mouseDownY = cursorY;
 
     // if object is selected with a shit key, add to selectedObjectStack
-    if (e.shiftKey && selectedObjectStack && selectedObjectStack !== layers) {
-        var object = getObjectAt(e.clientX, e.clientY);
+    if (isShift && selectedObjectStack && selectedObjectStack !== layers) {
+        var object = getObjectAt(cursorX, cursorY);
         for (var i = 0; i < object.length; i++) {
             if (object[i] && selectedObjectStack.indexOf(object[i]) === -1 && !object[i].is_layer) {
                 selectedObjectStack.push(object[i]);
             }
         }
     } else {
-        let object = getObjectAt(e.clientX, e.clientY);
+        let object = getObjectAt(cursorX, cursorY);
 
         if (object.length === 1 && !object[0].is_layer && selectedObjectStack && selectedObjectStack.length > 1 && selectedObjectStack.indexOf(object[0]) !== -1) {
 
@@ -500,7 +556,7 @@ canvas.addEventListener('mousedown', function (e) {
                 selectedObject = elementAtMouse;
             }
             // when clicked on right bottom corner of object, resize
-            if (!elementAtMouse.is_layer && e.clientX >= screenPosition.x + elementAtMouse.width * scale - 10 && e.clientY >= screenPosition.y + elementAtMouse.height * scale - 10) {
+            if (!elementAtMouse.is_layer && cursorX >= screenPosition.x + elementAtMouse.width * scale - 10 && cursorY >= screenPosition.y + elementAtMouse.height * scale - 10) {
                 resizingObject = true;
                 movingObject = false;
                 elementAtMouse.startingWidth = elementAtMouse.width;
@@ -515,22 +571,40 @@ canvas.addEventListener('mousedown', function (e) {
     }
 
     render();
+}
+
+canvas.addEventListener('mousedown', function (e) {
+    let cursorX = e.clientX;
+    let cursorY = e.clientY;
+    let isShift = e.shiftKey;
+
+    if (e.target !== contextMenu) {
+        closeContextMenu();
+        hideEditBox();
+    } else {
+        return;
+    }
+    startMoving(cursorX, cursorY, isShift);
 });
-canvas.addEventListener('mouseup', function (e) {
+
+function finishMove() {
     mouseDown = false;
     movingObject = false;
     resizingObject = false;
 
     render();
+}
+
+canvas.addEventListener('mouseup', function (e) {
+    finishMove();
 });
 
-canvas.addEventListener('mousemove', function (e) {
-
-    var object = getObjectAt(e.clientX, e.clientY);
+function move(cursorX, cursorY, isShift, isCtrl) {
+    var object = getObjectAt(cursorX, cursorY);
     if (object.length > 0 && !object[0].is_layer) {
         canvas.style.cursor = 'pointer';
 
-        if (e.clientX >= getScreenPosition(object[0]).x + object[0].width * scale - 10 && e.clientY >= getScreenPosition(object[0]).y + object[0].height * scale - 10) {
+        if (cursorX >= getScreenPosition(object[0]).x + object[0].width * scale - 10 && cursorY >= getScreenPosition(object[0]).y + object[0].height * scale - 10) {
             canvas.style.cursor = 'nwse-resize';
         }
 
@@ -540,12 +614,12 @@ canvas.addEventListener('mousemove', function (e) {
         canvas.style.cursor = 'default';
     }
 
-    currentPos.x = e.clientX;
-    currentPos.y = e.clientY;
+    currentPos.x = cursorX;
+    currentPos.y = cursorY;
 
     var step = 10;
 
-    if (e.shiftKey) {
+    if (isShift) {
         step = 100;
     }
 
@@ -554,14 +628,14 @@ canvas.addEventListener('mousemove', function (e) {
             for (var i = 0; i < selectedObjectStack.length; i++) {
                 var element = selectedObjectStack[i];
                 if (element.is_layer) {
-                    element.x = element.startingX + (e.clientX - mouseDownX);
-                    element.y = element.startingY + (e.clientY - mouseDownY);
+                    element.x = element.startingX + (cursorX - mouseDownX);
+                    element.y = element.startingY + (cursorY - mouseDownY);
 
-                }else {
-                    element.x = element.startingX + (e.clientX - mouseDownX) / scale;
-                    element.y = element.startingY + (e.clientY - mouseDownY) / scale;
+                } else {
+                    element.x = element.startingX + (cursorX - mouseDownX) / scale;
+                    element.y = element.startingY + (cursorY - mouseDownY) / scale;
 
-                    if (e.ctrlKey) {
+                    if (isCtrl) {
                         element.x = Math.round(element.x / step) * step;
                         element.y = Math.round(element.y / step) * step;
                     }
@@ -570,10 +644,10 @@ canvas.addEventListener('mousemove', function (e) {
         } else if (resizingObject) {
             for (var i = 0; i < selectedObjectStack.length; i++) {
                 element = selectedObjectStack[i];
-                element.width = element.startingWidth + (e.clientX - mouseDownX) / scale;
-                element.height = element.startingHeight + (e.clientY - mouseDownY) / scale;
+                element.width = element.startingWidth + (cursorX - mouseDownX) / scale;
+                element.height = element.startingHeight + (cursorY - mouseDownY) / scale;
 
-                if (e.ctrlKey) {
+                if (isCtrl) {
                     element.width = Math.round(element.width / step) * step;
                     element.height = Math.round(element.height / step) * step;
                 }
@@ -589,13 +663,21 @@ canvas.addEventListener('mousemove', function (e) {
 
         render();
     }
+}
+
+canvas.addEventListener('mousemove', function (e) {
+
+    let cursorX = e.clientX;
+    let cursorY = e.clientY;
+    let isShift = e.shiftKey;
+    let isCtrl = e.ctrlKey;
+    move(cursorX, cursorY, isShift, isCtrl);
 });
 
-canvas.addEventListener('dblclick', function (e) {
-    // when double clicking on an object, create textarea to edit text
-    var object = getObjectAt(e.clientX, e.clientY);
+function editObjectAt(cursorX, cursorY) {
+    var object = getObjectAt(cursorX, cursorY);
     if (object.length > 0) {
-        for(var i = 0; i < object.length; i++) {
+        for (var i = 0; i < object.length; i++) {
             if (!object[i].is_layer) {
                 selectedObject = object[i];
                 showEditBox();
@@ -603,13 +685,20 @@ canvas.addEventListener('dblclick', function (e) {
             }
         }
     }
+}
+
+canvas.addEventListener('dblclick', function (e) {
+    // when double clicking on an object, create textarea to edit text
+    let cursorX = e.clientX;
+    let cursorY = e.clientY;
+    editObjectAt(cursorX, cursorY);
 })
-// when the mouse wheel is scrolled, zoom in or out
-canvas.addEventListener('mousewheel', function (e) {
+
+function zoom(delta, cursorX, cursorY) {
     var oldScale = scale;
     let factor = 0.2;
 
-    if (e.wheelDelta > 0) {
+    if (delta > 0) {
         scale += factor;
     } else {
         scale -= factor;
@@ -624,32 +713,51 @@ canvas.addEventListener('mousewheel', function (e) {
 
     // move all leyers to match the mouse position
     for (var i = 0; i < layers.length; i++) {
-        layers[i].x = e.clientX - (e.clientX - layers[i].x) * scale / oldScale;
-        layers[i].y = e.clientY - (e.clientY - layers[i].y) * scale / oldScale;
+
+        layers[i].x = cursorX - (cursorX - layers[i].x) * scale / oldScale;
+        layers[i].y = cursorY - (cursorY - layers[i].y) * scale / oldScale;
     }
 
     render();
+}
+
+// when the mouse wheel is scrolled, zoom in or out
+canvas.addEventListener('mousewheel', function (e) {
+    zoom(e.wheelDelta, e.clientX, e.clientY);
 });
 
-// when right click, show context menu at the mouse position only if there is object at the mouse position
-canvas.addEventListener('contextmenu', function (e) {
-    e.preventDefault();
-    var object = getObjectAt(e.clientX, e.clientY, true);
+canvas.addEventListener('wheel', function (e) {
+    zoom(-e.deltaY, e.clientX, e.clientY);
+});
+
+function openContextMenu(x, y) {
+    var object = getObjectAt(x, y, true);
     if (object.length > 0) {
-        for(var i = 0; i < object.length; i++) {
+        for (var i = 0; i < object.length; i++) {
             if (!object[i].is_layer) {
                 contextMenu.style.display = 'block';
-                contextMenu.style.left = e.clientX + 'px';
-                contextMenu.style.top = e.clientY + 'px';
+                contextMenu.style.left = x + 'px';
+                contextMenu.style.top = y + 'px';
                 selectedObjectStack = object;
                 selectedObject = object[i];
 
-                renderContextMenu();
+                // if context menu is outside of the canvas, move it inside
+                if (contextMenu.offsetLeft + contextMenu.offsetWidth > canvas.offsetLeft + canvas.offsetWidth) {
+                    contextMenu.style.left = canvas.offsetLeft + canvas.offsetWidth - contextMenu.offsetWidth + 'px';
+                }
                 return;
             }
         }
 
     }
+}
+
+// when right click, show context menu at the mouse position only if there is object at the mouse position
+canvas.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    let x = e.clientX;
+    let y = e.clientY;
+    openContextMenu(x, y);
 });
 
 // when editing text, update the object text
@@ -706,8 +814,10 @@ window.addEventListener('resize', function () {
     canvas.height = window.innerHeight;
     ctx.width = window.innerWidth;
     ctx.height = window.innerHeight;
-    render();
+    render(true);
 });
+
+
 
 // function to move the selected object to the top of the layer
 function moveObjectToTop() {
@@ -746,21 +856,39 @@ function selectAll(layerName) {
 
 var newCard = document.getElementById('newCard');
 
-// when newCard is hold, create new card and start dragging
-newCard.addEventListener('mousedown', function (e) {
-    e.preventDefault();
-    var newobj = addCard(e.clientX, e.clientY, selectedLayer);
+function addNewCardAt(x, y) {
+    var newobj = addCard(x, y, selectedLayer);
     selectedObjectStack = [newobj];
-    newobj.startingX = newobj.x - newobj.width/2;
-    newobj.startingY = newobj.y - newobj.height/2;
+    newobj.startingX = newobj.x - newobj.width / 2;
+    newobj.startingY = newobj.y - newobj.height / 2;
 
     movingObject = true;
     resizingObject = false;
     mouseDown = true;
-    mouseDownX = e.clientX;
-    mouseDownY = e.clientY;
+    mouseDownX = x;
+    mouseDownY = y;
 
     render();
+}
+
+// when newCard is hold, create new card and start dragging
+newCard.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+    let x = e.clientX;
+    let y = e.clientY;
+    addNewCardAt(x, y);
+});
+
+var touchStartTime;
+var touchStartPosition;
+var touchEndPosition;
+var touchTaps = 0;
+
+newCard.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    let x = e.touches[0].clientX;
+    let y = e.touches[0].clientY;
+    addNewCardAt(canvas.width / 2 - 50, canvas.height / 2 - 50);
 });
 
 // close instructions div when close button is clicked
@@ -770,3 +898,131 @@ closeInstructions.addEventListener('click', function () {
     instructions.style.display = 'none';
     closeInstructions.style.display = 'none';
 });
+
+
+// when touch is started with one touch, invoke startMoving
+canvas.addEventListener('touchstart', function (e) {
+    console.log('touchstart');
+    e.preventDefault();
+
+    if (e.target !== contextMenu) {
+        closeContextMenu();
+        hideEditBox();
+    } else {
+        return;
+    }
+
+    if (e.touches.length === 2) {
+        startZooming(e.touches[0].clientX, e.touches[0].clientY, e.touches[1].clientX, e.touches[1].clientY);
+        return;
+    }
+
+    if (e.touches.length === 1) {
+        startMoving(e.touches[0].clientX, e.touches[0].clientY, false);
+    }
+
+    //save current time in milliseconds to check if it is a long press
+    touchStartTime = new Date().getTime();
+    touchStartPosition = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+    }
+});
+
+// when touch is moved with one touch, invoke move
+canvas.addEventListener('touchmove', function (e) {
+    console.log('touchmove');
+    e.preventDefault();
+
+    if (e.touches.length === 2) {
+        zooming(e.touches[0].clientX, e.touches[0].clientY, e.touches[1].clientX, e.touches[1].clientY);
+        return;
+    }
+    if (e.touches.length === 1) {
+        move(e.touches[0].clientX, e.touches[0].clientY, false, false);
+    }
+
+});
+
+function processTaps() {
+    console.log('processTaps', touchTaps);
+    if (touchTaps >= 2) {
+        editObjectAt(touchStartPosition.x, touchStartPosition.y);
+    }
+
+    touchTaps = 0;
+}
+
+function processLongTaps() {
+    // when touchTaps is 1 and touch is held for more than 1000ms, show context menu
+    if (touchTaps === 0 && new Date().getTime() - touchStartTime > 500) {
+        // if distance between touchstart and touchend is less than 100, show context menu
+        if (Math.abs(touchStartPosition.x - touchEndPosition.x) < 100 && Math.abs(touchStartPosition.y - touchEndPosition.y) < 50) {
+            openContextMenu(touchStartPosition.x, touchStartPosition.y);
+        }
+    }
+}
+
+canvas.addEventListener('touchend', function (e) {
+    console.log('touchend');
+    e.preventDefault();
+    finishMove();
+    zoomingAllowed = true;
+    touchEndPosition = {
+        x: e.changedTouches[0].clientX,
+        y: e.changedTouches[0].clientY
+    };
+
+    //check if it is a long press
+    if (new Date().getTime() - touchStartTime < 500) {
+        touchTaps++;
+        setTimeout(processTaps, 500);
+    } else {
+        processLongTaps();
+        touchTaps = 0;
+    }
+});
+
+var zoomingCenter;
+var zoomingStartingDistance;
+var zoomingAllowed = true;
+
+function startZooming(x1, y1, x2, y2) {
+    if (!zoomingAllowed) {
+        return;
+    }
+    zoomingCenter = {
+        x: (x1 + x2) / 2,
+        y: (y1 + y2) / 2
+    };
+
+    zoomingStartingDistance = Math.hypot(x1 - x2, y1 - y2);
+    console.log('start zooming', zoomingStartingDistance);
+}
+
+function zooming(x1, y1, x2, y2) {
+    if (!zoomingAllowed) {
+        return;
+    }
+    var distance = Math.hypot(x1 - x2, y1 - y2);
+
+    if (Math.abs(distance - zoomingStartingDistance) < 50) {
+        return;
+    }
+
+    zoomingAllowed = false;
+
+    if (distance < zoomingStartingDistance) {
+        zoomingStartingDistance = distance;
+        distance = -distance;
+    }else {
+        zoomingStartingDistance = distance;
+    }
+
+    console.log('zooming', distance);
+
+    zoom(distance, zoomingCenter.x, zoomingCenter.y);
+    setTimeout(function () {
+        zoomingAllowed = true;
+    }, 3);
+}
